@@ -1,5 +1,4 @@
 OPTIONS = -std=c++11 -DCURVE_ALT_BN128 -DNO_PROCPS -ggdb
-INCLUDE = -I/usr/local/include/libff
 LIBS    = -lsnark -lff -lgmp -lstdc++ -lprocps -lgmpxx
 GCC			= g++
 
