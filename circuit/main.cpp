@@ -18,8 +18,12 @@ using namespace libsnark;
 
 int main() {
   constexpr size_t dimension = 10; // Dimension of the vector
-  using ppT = default_r1cs_ppzksnark_pp; // Use the default public parameters
-  using FieldT = ppT::Fp_type; // ppT is a specification for a collection of types, among which Fp_type is the base field
+	// using ppT = default_r1cs_ppzksnark_pp; // Use the default public parameters
+  // using FieldT = ppT::Fp_type; // ppT is a specification for a collection of types, among which Fp_type is the base field
+	typedef libff::default_ec_pp ppT;
+  typedef libff::Fr<libff::default_ec_pp> FieldT;
+  ppT::init_public_params(); // Initialize the libsnark
+
   const auto one = FieldT::one(); // constant
   std::vector<FieldT> public_input{one,one,one,one,one,one,one,one,one,one}; // x = (1,1,1,1,1,1,1,1,1,1)
   std::vector<FieldT> secret_input{one,-one,one,-one,one,-one,one,-one,one,-one}; // our secret a such that <x,a> = 0
@@ -32,7 +36,6 @@ int main() {
   pb_variable_array<FieldT> B; // The input wires (anchor) for a
   pb_variable<FieldT> res; // The output wire (anchor)
 
-  ppT::init_public_params(); // Initialize the libsnark
   /* Allocate the anchors on the protoboard.
    * Note: all the public input anchors must be allocated first before
    * any other anchors. The reason is that libsnark simply treats the first
@@ -59,7 +62,7 @@ int main() {
   /***************************************/
   /* Trusted Third Party: Key generation */
   /***************************************/
-  auto keypair = r1cs_ppzksnark_generator<ppT>(pb.get_constraint_system());
+  auto keypair = r1cs_ppzksnark_generator<ppT>(cs);
 
   /**************************************************/
   /* Prover: Fill in both inputs and generate proof */
@@ -74,6 +77,7 @@ int main() {
    * now execute this function to function the gadget and fill in the other
    * anchors */
   compute_inner_product.generate_r1cs_witness();
+
   auto pi = pb.primary_input();
   auto ai = pb.auxiliary_input();
   /* If res is not zero, this function will crash complaining that
